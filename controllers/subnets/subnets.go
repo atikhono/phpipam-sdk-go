@@ -141,6 +141,13 @@ func (c *Controller) GetFirstFreeAddress(id int) (out string, err error) {
 	return
 }
 
+// GetFirstFreeSubnet GETs the first free subnet in a master subnet and returns
+// it as a atring.
+func (c *Controller) GetFirstFreeSubnet(id int, mask int) (out string, err error) {
+	err = c.SendRequest("GET", fmt.Sprintf("/subnets/%d/first_subnet/%d/", id, mask), &struct{}{}, &out)
+	return
+}
+
 // GetAddressesInSubnet GETs the IP addresses for a specific subnet, via a
 // supplied subnet ID.
 func (c *Controller) GetAddressesInSubnet(id int) (out []addresses.Address, err error) {
