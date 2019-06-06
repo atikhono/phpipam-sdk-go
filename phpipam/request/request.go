@@ -11,6 +11,8 @@ import (
 	"github.com/paybyphone/phpipam-sdk-go/phpipam/session"
 )
 
+type ConvertibleBoolean bool
+
 // APIResponse represents a PHPIPAM response body. Both successful and
 // unsuccessful requests share the same response format.
 type APIResponse struct {
@@ -25,7 +27,7 @@ type APIResponse struct {
 	Message string
 
 	// Whether or not the API request was successful.
-	Success bool
+	Success ConvertibleBoolean
 }
 
 // Request represents the API request.
@@ -67,6 +69,18 @@ func (r *requestResponse) BodyString() string {
 	return buf.String()
 }
 
+func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
+	asString := string(data)
+	if asString == "1" || asString == "true" {
+		*bit = true
+	} else if asString == "0" || asString == "false" {
+		*bit = false
+	} else {
+		return fmt.Errorf("Boolean unmarshal error: invalid input %s", asString)
+	}
+	return nil
+}
+
 // readResponseJSON reads a "successful" response body as JSON into variable
 // pointed to by v.
 //
@@ -80,9 +94,9 @@ func (r *requestResponse) ReadResponseJSON(v interface{}) error {
 		return fmt.Errorf("JSON parsing error: %s - Response body: %s", err, r.Body)
 	}
 
-	if !resp.Success {
-		return r.handleError()
-	}
+	//if !resp.Success {
+	//	return r.handleError()
+	//}
 
 	if string(resp.Data) != "" {
 		if err := json.Unmarshal(resp.Data, v); err != nil {
